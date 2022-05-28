@@ -1,21 +1,26 @@
+from numba import jit, cuda
 import numpy as np
-import time
+from timeit import default_timer as timer
 
 
-def VectorAdd(a, b):
-    return a + b
+def func(a):
+    for i in range(10000000):
+        a[i] += 1
 
+@jit(nopython=True)
+def func2(a):
+    for i in range(10000000):
+        a[i] += 1
 
-def main():
-    N = 32000000
+if __name__=='__main__':
+    n = 10000000
+    a = np.ones(n, dtype=np.float64)
+    b = np.ones(n, dtype=np.float32)
 
-    A = np.ones(N)
-    B = np.ones(N)
+    start = timer()
+    func(a)
+    print(f'without GPU: {timer()-start}')
 
-    start_time = time.time()
-
-    C = VectorAdd(A, B)
-    print(f'Time elapsed {time.time() - start_time}')
-
-if __name__ == '__main__':
-    main()
+    start = timer()
+    func2(a)
+    print(f'with GPU: {timer() - start}')
